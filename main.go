@@ -9,6 +9,7 @@ import (
 	lambda "github.com/aws/aws-lambda-go/lambda"
 	"github.com/fatimaalcaraz/TwitterGo/awsgo"
 	"github.com/fatimaalcaraz/TwitterGo/bd"
+	"github.com/fatimaalcaraz/TwitterGo/handlers"
 	"github.com/fatimaalcaraz/TwitterGo/models"
 	"github.com/fatimaalcaraz/TwitterGo/secretmanager"
 )
@@ -66,6 +67,20 @@ func EjecutoLambda(ctx context.Context, request events.APIGatewayProxyRequest) (
 			},
 		}
 		return resp, nil
+	}
+	respAPI := handlers.Manejadores(awsgo.Ctx, request)
+	if respAPI.CustomResp == nil {
+		resp = &events.APIGatewayProxyResponse{
+			StatusCode: respAPI.Status,
+			Body:       respAPI.Message,
+			Headers: map[string]string{
+				"Content-type": "application/json",
+			},
+		}
+		return resp, nil
+
+	} else {
+		return respAPI.CustomResp, nil
 	}
 }
 
